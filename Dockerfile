@@ -8,7 +8,7 @@ ARG ECLIPSE_P2_APP=org.eclipse.equinox.p2.director
 ARG ST_REPOSITORY=https://sw-center.st.com/stm32cubeide/updatesite1
 
 ARG STM32CUBEIDE_IU=com.st.stm32cube.ide.mcu.rcp.product
-ARG ARM_TOOLCHAIN_DEFINITION=com.st.stm32cube.ide.feature.mcu.toolchain.arm_none.feature.group
+ARG ARM_TOOLCHAIN_DEFINITION_IU=com.st.stm32cube.ide.feature.mcu.toolchain.arm_none.feature.group
 ARG LINKER_SCRIPT_FILE_EDITOR_IU=com.st.stm32cube.ide.feature.mcu.linker.ui.feature.group
 ARG C_GCC_CROSS_COMPILER_SUPPORT_IU=org.eclipse.cdt.build.crossgcc.feature.group
 ARG C_ARM_CROSS_COMPILER_IU=org.eclipse.embedcdt.managedbuild.cross.arm.feature.group
@@ -31,4 +31,4 @@ RUN ${ECLIPSE_INSTALLER_DIR}/eclipse-inst \
 RUN ${STM32CUBEIDE_DIR}/stm32cubeide \
 -application ${ECLIPSE_P2_APP} \
 -repository ${ST_REPOSITORY} \
--installIU ${C_ARM_CROSS_COMPILER_IU},${C_CORE_IU}
+-installIU ${ARM_TOOLCHAIN_DEFINITION_IU},${LINKER_SCRIPT_FILE_EDITOR_IU},${C_GCC_CROSS_COMPILER_SUPPORT_IU},${C_ARM_CROSS_COMPILER_IU},${C_CORE_IU}
