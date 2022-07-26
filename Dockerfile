@@ -47,7 +47,7 @@ $STM32CUBEIDE_DIR/stm32cubeide -application $ECLIPSE_P2_APP -repository $ST_REPO
 ARG GET_IDE_LOCAL_VERSION='$STM32CUBEIDE_DIR/stm32cubeide -application $ECLIPSE_P2_APP -lir | grep "$STM32CUBEIDE_IU/" | sed -e "s/$STM32CUBEIDE_IU\///g"'
 ARG GET_IDE_REMOTE_VERSION='$STM32CUBEIDE_DIR/stm32cubeide -application $ECLIPSE_P2_APP -repository $ST_REPOSITORY -l 2>/dev/null | grep "$STM32CUBEIDE_IU=" | sed -e "s/$STM32CUBEIDE_IU=//g" | tail -n1'
 
-RUN echo "alias stm32cubeide_listui='$LIST_UI_CMD'" >> ~/.bashrc
-RUN echo "alias stm32cubeide_update='$UPDATE_CMD'" >> ~/.bashrc
-RUN echo "alias stm32cubeide_getlocalversion='$GET_IDE_LOCAL_VERSION'" >> ~/.bashrc
-RUN echo "alias stm32cubeide_getremoteversion='$GET_IDE_REMOTE_VERSION'" >> ~/.bashrc
+RUN echo "#!/bin/bash\n$LIST_UI_CMD" > /usr/bin/stcubeide_listUI && chmod +x /usr/bin/stcubeide_listUI
+RUN echo "#!/bin/bash\n$UPDATE_CMD" > /usr/bin/stcubeide_update && chmod +x /usr/bin/stcubeide_update
+RUN echo "#!/bin/bash\n$GET_IDE_LOCAL_VERSION" > /usr/bin/stcubeide_getLocalVersion && chmod +x /usr/bin/stcubeide_getLocalVersion
+RUN echo "#!/bin/bash\n$GET_IDE_REMOTE_VERSION" > /usr/bin/stcubeide_getRemoteVersion && chmod +x /usr/bin/stcubeide_getRemoteVersion
