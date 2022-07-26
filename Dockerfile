@@ -4,18 +4,18 @@ FROM ubuntu
 ENV ECLIPSE_INSTALLER_DIR=/opt/eclipse-installer
 ENV STM32CUBEIDE_DIR=/opt/stm32cubeide
 
-ARG ECLIPSE_P2_APP=org.eclipse.equinox.p2.director
-ARG ST_REPOSITORY=https://sw-center.st.com/stm32cubeide/updatesite1
+ENV ECLIPSE_P2_APP=org.eclipse.equinox.p2.director
+ENV ST_REPOSITORY=https://sw-center.st.com/stm32cubeide/updatesite1
 
-ARG STM32CUBEIDE_IU=com.st.stm32cube.ide.mcu.rcp.product
-ARG ARM_TOOLCHAIN_DEFINITION_IU=com.st.stm32cube.ide.feature.mcu.toolchain.arm_none.feature.group
-ARG LINKER_SCRIPT_FILE_EDITOR_IU=com.st.stm32cube.ide.feature.mcu.linker.ui.feature.group
-ARG C_GCC_CROSS_COMPILER_SUPPORT_IU=org.eclipse.cdt.build.crossgcc.feature.group
-ARG C_ARM_CROSS_COMPILER_IU=org.eclipse.embedcdt.managedbuild.cross.arm.feature.group
-ARG C_CORE_IU=org.eclipse.embedcdt.feature.group
+ENV STM32CUBEIDE_IU=com.st.stm32cube.ide.mcu.rcp.product
+ENV ARM_TOOLCHAIN_DEFINITION_IU=com.st.stm32cube.ide.feature.mcu.toolchain.arm_none.feature.group
+ENV LINKER_SCRIPT_FILE_EDITOR_IU=com.st.stm32cube.ide.feature.mcu.linker.ui.feature.group
+ENV C_GCC_CROSS_COMPILER_SUPPORT_IU=org.eclipse.cdt.build.crossgcc.feature.group
+ENV C_ARM_CROSS_COMPILER_IU=org.eclipse.embedcdt.managedbuild.cross.arm.feature.group
+ENV C_CORE_IU=org.eclipse.embedcdt.feature.group
 
 # Install requirements
-RUN apt-get update && apt-get install -y wget tar openssh-client default-jre
+RUN apt-get update && apt-get install -y wget tar openssh-client default-jre libxml2-utils
 
 # Install Eclipse
 RUN wget "https://mirror.ibcp.fr/pub/eclipse/oomph/epp/2021-06/R/eclipse-inst-jre-linux64.tar.gz" -P /home
@@ -32,3 +32,22 @@ RUN ${STM32CUBEIDE_DIR}/stm32cubeide \
 -application ${ECLIPSE_P2_APP} \
 -repository ${ST_REPOSITORY} \
 -installIU ${ARM_TOOLCHAIN_DEFINITION_IU},${LINKER_SCRIPT_FILE_EDITOR_IU},${C_GCC_CROSS_COMPILER_SUPPORT_IU},${C_ARM_CROSS_COMPILER_IU},${C_CORE_IU}
+
+# Aliases
+ARG LIST_UI_CMD='ListIu=$($STM32CUBEIDE_DIR/stm32cubeide -application $ECLIPSE_P2_APP -lir);\
+ListIu=${ListIu/"$STM32CUBEIDE_IU"/STM32CUBEIDE};\
+ListIu=${ListIu/"$ARM_TOOLCHAIN_DEFINITION_IU"/ARM_TOOLCHAIN_DEFINITION};\
+ListIu=${ListIu/"$LINKER_SCRIPT_FILE_EDITOR_IU"/LINKER_SCRIPT_FILE_EDITOR};\
+ListIu=${ListIu/"$C_GCC_CROSS_COMPILER_SUPPORT_IU"/C_GCC_CROSS_COMPILER_SUPPORT};\
+ListIu=${ListIu/"$C_ARM_CROSS_COMPILER_IU"/C_ARM_CROSS_COMPILER};\
+ListIu=${ListIu/"$C_CORE_IU"/C_CORE};\
+echo "$ListIu"'
+ARG UPDATE_CMD='$STM32CUBEIDE_DIR/stm32cubeide -application $ECLIPSE_P2_APP -repository $ST_REPOSITORY -installIU $STM32CUBEIDE_IU || { rm -R $STM32CUBEIDE_DIR; $ECLIPSE_INSTALLER_DIR/eclipse-inst -application $ECLIPSE_P2_APP -repository $ST_REPOSITORY -installIU $STM32CUBEIDE_IU -destination $STM32CUBEIDE_DIR; };\
+$STM32CUBEIDE_DIR/stm32cubeide -application $ECLIPSE_P2_APP -repository $ST_REPOSITORY -installIU $ARM_TOOLCHAIN_DEFINITION_IU,$LINKER_SCRIPT_FILE_EDITOR_IU,$C_GCC_CROSS_COMPILER_SUPPORT_IU,${C_ARM_CROSS_COMPILER_IU},${C_CORE_IU}'
+ARG GET_IDE_LOCAL_VERSION='$STM32CUBEIDE_DIR/stm32cubeide -application $ECLIPSE_P2_APP -lir | grep "$STM32CUBEIDE_IU/" | sed -e "s/$STM32CUBEIDE_IU\///g"'
+ARG GET_IDE_REMOTE_VERSION='$STM32CUBEIDE_DIR/stm32cubeide -application $ECLIPSE_P2_APP -repository $ST_REPOSITORY -l 2>/dev/null | grep "$STM32CUBEIDE_IU=" | sed -e "s/$STM32CUBEIDE_IU=//g" | tail -n1'
+
+RUN echo "alias stm32cubeide_listui='$LIST_UI_CMD'" >> ~/.bashrc
+RUN echo "alias stm32cubeide_update='$UPDATE_CMD'" >> ~/.bashrc
+RUN echo "alias stm32cubeide_getlocalversion='$GET_IDE_LOCAL_VERSION'" >> ~/.bashrc
+RUN echo "alias stm32cubeide_getremoteversion='$GET_IDE_REMOTE_VERSION'" >> ~/.bashrc
